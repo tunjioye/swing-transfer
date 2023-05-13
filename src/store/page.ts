@@ -1,13 +1,13 @@
 import { entity, persistence } from "simpler-state";
 
-export type ColorSchemeType = "light" | "dark";
+export type ColorScheme = "light" | "dark";
 
-export type PageStoreStateType = {
-  colorScheme: ColorSchemeType;
+export type PageStoreState = {
+  colorScheme: ColorScheme;
 };
 
 // initial state
-const initialState: PageStoreStateType = {
+const initialState: PageStoreState = {
   colorScheme: "light",
 };
 
@@ -15,7 +15,7 @@ const initialState: PageStoreStateType = {
 export const page = entity(initialState, [persistence("st_page")]);
 
 // entity updaters
-export const setColorScheme = (colorScheme: ColorSchemeType = "light") => {
+export const setColorScheme = (colorScheme: ColorScheme = "light") => {
   return page.set((value) => ({
     ...value,
     colorScheme,

@@ -39,3 +39,52 @@
     }
   }
 }
+
+.tokenSelector {
+  max-width: 540px;
+
+  select,
+  input {
+    margin: 0;
+  }
+}
+
+.inputCombo {
+  position: relative;
+  margin-top: 0.125rem;
+
+  input {
+    padding-right: calc(11.25rem + var(--form-element-spacing-horizontal));
+  }
+
+  .unit {
+    position: absolute;
+    background-color: var(--background-color);
+    color: var(--muted-color);
+    font-size: 0.625rem;
+    bottom: 0.125rem;
+    right: calc(11.25rem + var(--form-element-spacing-horizontal));
+    display: flex;
+    align-items: center;
+    z-index: 1;
+  }
+
+  .addonBottomRight,
+  .addonTopRight {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    padding: 0.1rem 2.5rem 0.1rem 0.5rem;
+    border-radius: 0 0.25rem 0 0;
+    font-size: 0.85rem;
+    width: 11.25rem;
+  }
+
+  .addonBottomRight {
+    top: auto;
+    bottom: 0;
+    border-radius: 0 0 0.25rem 0;
+  }
+}
