@@ -1,0 +1,35 @@
+import { useEffect, useCallback } from "react";
+import type { AppProps } from "next/app";
+import Header from "components/Header";
+import Footer from "components/Footer";
+import { page, setColorScheme } from "@/store/page";
+
+import "@picocss/pico";
+import "src/style/theme.css";
+import "src/style/style.css";
+
+export default function App({ Component, pageProps }: AppProps) {
+  const { colorScheme } = page.use();
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", colorScheme);
+  }, [colorScheme]);
+
+  useEffect(() => {
+    const systemColorScheme = window.matchMedia("(prefers-color-scheme: dark)");
+    systemColorScheme.addEventListener("change", (e: MediaQueryListEvent) => {
+      const newColorScheme = e.matches ? "dark" : "light";
+      setColorScheme(newColorScheme);
+    });
+    return () => {
+      systemColorScheme.removeEventListener("change", () => null);
+    };
+  }, []);
+
+  return (
+    <>
+      <Header />
+      <Component {...pageProps} />
+      <Footer />
+    </>
+  );
+}
