@@ -7,6 +7,7 @@ const nextConfig = {
   publicRuntimeConfig: {
     // Will be available on both server and client
     APP_NAME: process.env.APP_NAME,
+    SWING_PROJECT_ID: process.env.SWING_PROJECT_ID,
   },
 }
 

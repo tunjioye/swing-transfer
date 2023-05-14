@@ -11,6 +11,7 @@
   "dependencies": {
     "@next/font": "13.1.2",
     "@picocss/pico": "^1.5.6",
+    "@swing.xyz/sdk": "^0.20.2",
     "@types/node": "18.11.18",
     "@types/react": "18.0.26",
     "@types/react-dom": "18.0.10",
@@ -21,6 +22,7 @@
     "next-page-transitions": "^1.0.0-beta.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-hot-toast": "^2.4.1",
     "react-icons": "^4.7.1",
     "react-no-ssr": "^1.1.0",
     "sass": "^1.62.1",

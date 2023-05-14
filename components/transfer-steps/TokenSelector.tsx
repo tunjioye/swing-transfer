@@ -1,21 +1,26 @@
-import React, { FormEvent } from "react";
+import React, { FormEvent, useEffect, useMemo } from "react";
 import styles from "src/style/swingTransfer.module.scss";
 import clsx from "clsx";
-import {
-  BLOCKCHAIN_NAME,
-  BLOCKCHAIN_OPTIONS,
-  Blockchain,
-  TransferState,
-} from "components/SwingTransfer";
+import { transfer, setTransferState, getQuotes } from "@/store/transfer";
+import { BlockchainSlug } from "@/schema/types";
 
-type Props = {
-  readonly state: TransferState;
-  readonly setState: React.Dispatch<React.SetStateAction<TransferState>>;
+type Token = {
+  readonly symbol: string;
+  readonly address: string;
 };
 
-function TokenSelector(props: Props) {
-  const { state, setState } = props;
-  const { sourceChain, sourceToken, destinationChain, destinationToken } = state;
+export const BLOCKCHAIN_SLUG_OPTIONS: ReadonlyArray<BlockchainSlug> = ["polygon", "bsc"];
+
+function TokenSelector() {
+  const {
+    chains = [],
+    sourceChain,
+    sourceToken,
+    destinationChain,
+    destinationToken,
+    amount,
+    gettingQuotes,
+  } = transfer.use();
   const formatOnInput = (e: FormEvent<HTMLInputElement>) => {
     const target = e.target as HTMLInputElement;
     const value = target.value;
@@ -26,6 +31,27 @@ function TokenSelector(props: Props) {
     target.value = formattedValue;
   };
 
+  console.log("chains", chains);
+  const supportedChains = useMemo(() => {
+    return chains.filter((chain) => BLOCKCHAIN_SLUG_OPTIONS.includes(chain.slug));
+  }, [chains]);
+  const sourceTokenOptions: ReadonlyArray<Token> = useMemo(() => {
+    return supportedChains.find((chain) => chain.slug === sourceChain)?.tokens || [];
+  }, [supportedChains, sourceChain]);
+  const destinationTokenOptions: ReadonlyArray<Token> = useMemo(() => {
+    return supportedChains.find((chain) => chain.slug === destinationChain)?.tokens || [];
+  }, [supportedChains, destinationChain]);
+
+  // Reset destination token when destination chain changes
+  useEffect(() => {
+    const tokenOptions: ReadonlyArray<Token> =
+      supportedChains.find((chain) => chain.slug === destinationChain)?.tokens || [];
+    const currentTokenIsSupported = tokenOptions.some(({ symbol }) => symbol === destinationToken);
+    if (currentTokenIsSupported) return;
+
+    setTransferState({ destinationToken: "" });
+  }, [destinationChain, destinationToken, supportedChains]);
+
   return (
     <section className={clsx(styles.swingTransfer)}>
       <h4>Select Token</h4>
@@ -33,40 +59,52 @@ function TokenSelector(props: Props) {
         <div>
           <div>Source</div>
           <div className={styles.inputCombo}>
-            <input type="text" placeholder="0.0" inputMode="numeric" onInput={formatOnInput} />
+            <input
+              type="text"
+              placeholder="0.0"
+              inputMode="numeric"
+              value={amount}
+              onChange={(e) => {
+                setTransferState({
+                  amount: e.target.value,
+                });
+              }}
+              onInput={formatOnInput}
+            />
             <div className={styles.unit}>units in WEI</div>
             <select
+              disabled
               value={sourceChain}
               className={styles.addonTopRight}
               onChange={(e) => {
-                setState({
-                  ...state,
-                  sourceChain: e.target.value as Blockchain,
+                setTransferState({
+                  sourceChain: e.target.value as BlockchainSlug,
                 });
               }}
             >
               <option disabled>Select blockchain</option>
-              {BLOCKCHAIN_OPTIONS.map((blockchain) => (
-                <option key={blockchain} value={blockchain}>
-                  {BLOCKCHAIN_NAME[blockchain]}
+              {supportedChains.map(({ slug, name }) => (
+                <option key={slug} value={slug}>
+                  {name}
                 </option>
               ))}
             </select>
             <select
+              disabled
               value={sourceToken}
               className={styles.addonBottomRight}
               onChange={(e) => {
-                setState({
-                  ...state,
+                setTransferState({
                   sourceToken: e.target.value,
                 });
               }}
             >
               <option value="">Select token</option>
-              <option value="USDC">USDC</option>
-              <option value="USDT">USDT</option>
-              <option value="MATIC">MATIC</option>
-              <option value="BNB">BNB</option>
+              {sourceTokenOptions.map(({ symbol, address }) => (
+                <option key={address} value={symbol}>
+                  {symbol}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -80,16 +118,15 @@ function TokenSelector(props: Props) {
               value={destinationChain}
               className={styles.addonTopRight}
               onChange={(e) => {
-                setState({
-                  ...state,
-                  destinationChain: e.target.value as Blockchain,
+                setTransferState({
+                  destinationChain: e.target.value as BlockchainSlug,
                 });
               }}
             >
               <option disabled>Select blockchain</option>
-              {BLOCKCHAIN_OPTIONS.map((blockchain) => (
-                <option key={blockchain} value={blockchain}>
-                  {BLOCKCHAIN_NAME[blockchain]}
+              {supportedChains.map(({ slug, name }) => (
+                <option key={slug} value={slug}>
+                  {name}
                 </option>
               ))}
             </select>
@@ -97,22 +134,24 @@ function TokenSelector(props: Props) {
               value={destinationToken}
               className={styles.addonBottomRight}
               onChange={(e) => {
-                setState({
-                  ...state,
+                setTransferState({
                   destinationToken: e.target.value,
                 });
               }}
             >
               <option value="">Select token</option>
-              <option value="USDC">USDC</option>
-              <option value="USDT">USDT</option>
-              <option value="MATIC">MATIC</option>
-              <option value="BNB">BNB</option>
+              {destinationTokenOptions.map(({ symbol, address }) => (
+                <option key={address} value={symbol}>
+                  {symbol}
+                </option>
+              ))}
             </select>
           </div>
         </div>
         <br />
-        <button type="submit">Get Quotes</button>
+        <button type="submit" onClick={getQuotes} aria-busy={gettingQuotes}>
+          {!gettingQuotes && <span>Get Quote</span>}
+        </button>
       </div>
     </section>
   );

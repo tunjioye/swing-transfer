@@ -9,6 +9,7 @@ import "@picocss/pico";
 import "src/style/theme.css";
 import "src/style/style.css";
 import { useRouter } from "next/router";
+import { Toaster } from "react-hot-toast";
 
 export default function App({ Component, pageProps }: AppProps) {
   const { pathname } = useRouter();
@@ -30,6 +31,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <>
+      <Toaster position="top-right" containerStyle={{ fontSize: "0.875rem" }} />
       <Header />
       <PageTransition timeout={300} classNames="main page-transition">
         <Component {...pageProps} key={pathname} />

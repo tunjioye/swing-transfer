@@ -5,8 +5,9 @@ import TokenSelector from "components/transfer-steps/TokenSelector";
 import QuoteSelector from "components/transfer-steps/QuoteSelector";
 import TransferStatus from "components/transfer-steps/TransferStatus";
 import Completion from "components/transfer-steps/Completion";
+import swingSDK from "@/utils/swingSDK";
+import { transfer, getConfig, TransferStep, setTransferState } from "@/store/transfer";
 
-export type TransferStep = "SELECT_TOKEN" | "SELECT_QUOTE" | "TRANSFER_STATUS" | "COMPLETION";
 const transferSteps: ReadonlyArray<TransferStep> = [
   "SELECT_TOKEN",
   "SELECT_QUOTE",
@@ -14,50 +15,30 @@ const transferSteps: ReadonlyArray<TransferStep> = [
   "COMPLETION",
 ];
 
-export type Blockchain = "BLOCKCHAIN_POLYGON" | "BLOCKCHAIN_BSC";
-export const BLOCKCHAIN_OPTIONS: ReadonlyArray<Blockchain> = [
-  "BLOCKCHAIN_POLYGON",
-  "BLOCKCHAIN_BSC",
-];
-export const BLOCKCHAIN_NAME = {
-  BLOCKCHAIN_POLYGON: "Polygon",
-  BLOCKCHAIN_BSC: "Binance Smart Chain",
-};
-
-export type TransferState = {
-  step: TransferStep;
-  sourceChain: Blockchain;
-  sourceToken: string;
-  destinationChain: Blockchain;
-  destinationToken: string;
-};
-const initialState: TransferState = {
-  step: "SELECT_TOKEN",
-  sourceChain: "BLOCKCHAIN_POLYGON",
-  sourceToken: "",
-  destinationChain: "BLOCKCHAIN_BSC",
-  destinationToken: "",
-};
-
 function SwingTransfer() {
-  const [state, setState] = React.useState<TransferState>(initialState);
+  const { step, configIsSet } = transfer.use();
 
-  const { step } = state;
-  const setStep = (step: TransferStep) => setState((state) => ({ ...state, step }));
+  useEffect(() => {
+    getConfig();
+  }, []);
+  console.log("swingSDK", swingSDK);
+
   const renderStep = (step: TransferStep) => {
     switch (step) {
       case "SELECT_TOKEN":
-        return <TokenSelector state={state} setState={setState} />;
+        return <TokenSelector />;
       case "SELECT_QUOTE":
-        return <QuoteSelector state={state} setState={setState} />;
+        return <QuoteSelector />;
       case "TRANSFER_STATUS":
-        return <TransferStatus state={state} setState={setState} />;
+        return <TransferStatus />;
       case "COMPLETION":
-        return <Completion state={state} setState={setState} />;
+        return <Completion />;
       default:
         return null;
     }
   };
+
+  if (!configIsSet) return null;
 
   return (
     <div className={clsx(styles.swingTransfer)}>
@@ -67,7 +48,7 @@ function SwingTransfer() {
         <ul>
           {transferSteps.map((stepName, index) => (
             <li key={stepName} className={clsx({ [styles.currentStep]: step === stepName })}>
-              <button type="button" onClick={() => setStep(stepName)}>
+              <button type="button" onClick={() => setTransferState({ step: stepName })}>
                 {index + 1}
               </button>
             </li>
